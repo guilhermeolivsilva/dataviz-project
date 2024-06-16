@@ -1,40 +1,55 @@
-# Run this app with `python app.py` and
-# visit http://127.0.0.1:8050/ in your web browser.
+"""Main source file for the Plotly Dash app."""
+
+import dash
+import dash_bootstrap_components as dbc
+from dash import Input, Output, dcc, html
+
+from src import *
 
 
-from dash import Dash, html, dcc
-import plotly.express as px
-import plotly.graph_objs as go
-import pandas as pd
-
-app = Dash(__name__)
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 
-# View 1: placeholder
+sidebar = html.Div(
+    [
+        dbc.Nav(
+            [
+                dbc.NavLink("Início", href="/", active="exact"),
+                dbc.NavLink("Visão geral", href="/overview", active="exact"),
+                dbc.NavLink("Preferências", href="/preferences", active="exact"),
+                dbc.NavLink("Jogos pagos vs. gratuitos", href="/free_to_play", active="exact"),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+    ],
+    style=SIDEBAR_STYLE,
+)
 
-def get_placeholder_fig():
-    placeholder = pd.DataFrame({
-        "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-        "Amount": [4, 1, 2, 2, 4, 5],
-        "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-    })
+content = html.Div(id="page-content", style=CONTENT_STYLE)
 
-    fig_placeholder = px.bar(placeholder, x="Fruit", y="Amount", color="City", barmode="group")
-
-    return fig_placeholder
-
-app.layout = html.Div(children=[
-    html.H1(children='Hello Dash'),
-
-    html.Div(children='''
-        Dash: A web application framework for your data.
-    '''),
-
-    dcc.Graph(
-        id='example-graph',
-        figure=get_placeholder_fig()
-    )
+app.layout = html.Div([
+    dcc.Location(id="url"),
+    sidebar,
+    content
 ])
+
+
+@app.callback(
+    Output("page-content", "children"),
+    [Input("url", "pathname")]
+)
+def render_page_content(pathname):
+    pages = {
+        "/": render_home,
+        "/overview": render_overview,
+        "/preferences": render_preferences,
+        "/free_to_play": render_free_to_play
+    }
+
+    handler = pages.get(pathname, render_not_found)
+
+    return handler(pathname=pathname)   
 
 
 if __name__ == '__main__':
