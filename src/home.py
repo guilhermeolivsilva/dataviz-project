@@ -29,6 +29,7 @@ def render_home(**kwargs):
         html.H5("Grupo"),
         html.Ul(
             children=[
+                html.P("Guilherme Barboza Mendonça"),
                 html.P("Guilherme de Oliveira Silva"),
                 html.P("Lucas Rios Bicalho"),
                 html.P("Kael Soares Augusto")
