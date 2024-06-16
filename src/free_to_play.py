@@ -41,12 +41,12 @@ def get_in_app_vs_single_purchase():
     y = list(range(0, 101, 1))
 
     layout = go.Layout(
-        yaxis=go.layout.YAxis(title='MetaScore'),
+        yaxis=go.layout.YAxis(title='Meta Score'),
         xaxis=go.layout.XAxis(
             range=[-10, 10],
             tickvals=[-8, -5, -3, 0, 3, 5, 8],
             ticktext=[8, 5, 3, 0, 3, 5, 8],
-            title='Proportion (%)'),    
+            title='Proporção (%)'),    
         barmode='overlay',
         bargap=0.1
     )
@@ -54,14 +54,14 @@ def get_in_app_vs_single_purchase():
     data = [go.Bar(y=y,
                 x=single_purchase_bins,
                 orientation='h',
-                name='Single Purchase',
+                name='Compra única',
                 hoverinfo='x',
-                marker=dict(color='powderblue')
+                marker=dict(color='mediumturquoise')
                 ),
             go.Bar(y=y,
                 x=in_app_purchases_bins,
                 orientation='h',
-                name='In-App Purchases',
+                name='Gratuitos c/ microtransações',
                 hoverinfo='x',
                 marker=dict(color='seagreen')
                 )
