@@ -1,4 +1,8 @@
-"""Style settings."""
+"""
+Style settings.
+
+Author: Guilherme Silva
+"""
 
 
 SIDEBAR_STYLE = {

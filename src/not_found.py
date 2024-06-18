@@ -1,4 +1,8 @@
-"""Render the 404 error handler."""
+"""
+Render the 404 error handler.
+
+Author: Guilherme Silva
+"""
 
 from dash import html
 
