@@ -54,46 +54,59 @@ def render_page_content(pathname):
 
 
 @app.callback(
-    Output(component_id="grafico-vendas-por-ano", component_property="figure"),
-    Input(component_id="radio-buttons-barmode", component_property="value"),
-    Input(component_id="dropdown-esquema-de-cores", component_property="value"),
-    Input(component_id="datatable-jogos", component_property="active_cell"),
+    Output(component_id='grafico-vendas-por-ano', component_property='figure'),
+    Input(component_id='radio-buttons-barmode', component_property='value'),
+    Input(component_id='dropdown-esquema-de-cores', component_property='value'),
+    Input(component_id='range-slider-unidades', component_property='value'),
+    Input(component_id='radio-buttons-escala', component_property='value'),
+    Input(component_id='datatable-jogos', component_property='derived_virtual_selected_rows'),
 )
-def on_radio_buttons_barmode_changed(barmode, esquema_de_cores, linha_selecionada):
+def gerar_grafico_vendas_por_ano(barmode, esquema_de_cores, valores_range, escala, linhas_selecionadas):
+    # Filtrando os dados
     df = pd.read_pickle("datasets/revenue.pkl")
-
+    filtered_df = df.query(f"total_vendas >= {valores_range[0]} and total_vendas <= {valores_range[1]}")
+    
     # Tratando o esquema de cores
-    color = "nome" if esquema_de_cores == "Por nome" else "total_vendas"
-
-    # Tratando a linha selecionada
-    if linha_selecionada is None:
-        df["aux_select"] = True
-    else:
-        df["aux_select"] = False
-        print(linha_selecionada)
-        df.iloc[linha_selecionada["row"], df.columns.get_loc("aux_select")] = True
-
-        color = "aux_select"
-
+    #color = 'nome' if esquema_de_cores == 'Por nome' else 'total_vendas'
+    color = list(filtered_df['cor']) if esquema_de_cores == 'Por nome' else 'total_vendas'
+    
+    # Tratando as linhas selecionadas
+    if linhas_selecionadas is not None and len(linhas_selecionadas) != 0:
+        color = ['#7FDBFF' if i in linhas_selecionadas else '#0074D9' for i in range(len(filtered_df))]
+    
     fig = px.bar(
-        df,
-        x="ano_lancamento",
+        filtered_df, 
+        x="ano_lancamento", 
         y="total_vendas",
-        hover_data=["nome", "publisher", "total_vendas", "data_lancamento"],
-        color=color,
+        hover_data=['nome', 'publisher', 'total_vendas', 'data_lancamento'],
+        color=color, 
         barmode=barmode,
+        labels={'ano_lancamento':'Ano de lançamento', 'total_vendas':'Unidades vendidas (mi)'}
     )
+    
+    fig.update_layout(showlegend=False)
+    fig.update_yaxes(type='linear' if escala == 'Linear' else 'log')
+    fig.update_traces(width=1)
 
     return fig
 
 
 @app.callback(
-    Output("datatable-jogos", "selected_cells"),
-    Output("datatable-jogos", "active_cell"),
-    Input("clear-selection-datatable-jogos", "n_clicks"),
+    Output(component_id='datatable-jogos', component_property='data'),
+    Input(component_id='range-slider-unidades', component_property='value')
 )
-def clear(n_clicks):
-    return [], None
+def gerar_dataset_tabela(valores_range):
+    df = pd.read_pickle("datasets/revenue.pkl")
+    filtered_df = df.query(f"total_vendas >= {valores_range[0]} and total_vendas <= {valores_range[1]}")
+    return filtered_df.to_dict('records')
+
+
+@app.callback(
+    Output("datatable-jogos", "selected_rows"),
+    Input("clear-selection-datatable-jogos", "n_clicks"),    
+)
+def clear_selection_datatable(n_clicks):
+    return []
 
 
 if __name__ == "__main__":
